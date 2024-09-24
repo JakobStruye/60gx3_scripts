@@ -37,7 +37,7 @@ username = "root"
 password = "admin"
 remote_file = "out13"
 local_file = "out13"
-
+window = 100
 #client = paramiko.client.SSHClient()
 #client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 #client.connect(host, username=username, password=password)
@@ -66,11 +66,12 @@ while True:
         #num_lines_read += len(lines)
 
         # Exit the loop if there are no more lines to read
-       
-        lines = tail(local_file,100)
+        
+        lines = tail(local_file,window)
         # Parse the CSI data from the current lines
-        mag, phase, time_csi = Parse_csi(lines)
-
+        mag, phase, time_csi, bad_idxs = Parse_csi(lines)
+        if bad_idxs:
+            mag = mag[:window - len(bad_idxs)]
         # Create new dataframes to store the current iteration's data
         df_amps_iter = pd.DataFrame(mag)
         df_phs_iter = pd.DataFrame(phase)
@@ -91,6 +92,8 @@ while True:
         plt.clf()
         average_amps = df_amps.iloc[:, :].mean(axis=1)
         plt.plot(average_amps, color='blue', linestyle='solid')  
+        for bad_idx in bad_idxs:
+            plt.axvline(bad_idx)
         plt.draw()
         plt.pause(0.01)
         #if not lines:

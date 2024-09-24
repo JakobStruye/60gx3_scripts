@@ -4,6 +4,7 @@ def Parse_csi(lines):
     
     num_lines = len(lines)
     print(num_lines) 
+    bad_idxs = []
     
     
     correct = 0
@@ -13,7 +14,7 @@ def Parse_csi(lines):
     magnitudes = np.zeros((num_lines, 32))
     phases = np.zeros((num_lines, 32))
     
-    for line in lines:
+    for idx, line in enumerate(lines):
         if "[AOA]" in line and line.count(",") == 71:
             splitted = line.split(",")
             time = float(splitted[1])
@@ -35,9 +36,10 @@ def Parse_csi(lines):
                 
         else:
             incorrect += 1
+            bad_idxs.append(idx)
             
     
     
     # print(f"In the file {filename}, there were {correct} valid entries and {incorrect} invalid entries, with a ratio of {correct/(correct+incorrect)}.")
     
-    return magnitudes, phases, times
+    return magnitudes, phases, times, bad_idxs

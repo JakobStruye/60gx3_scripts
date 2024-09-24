@@ -23,12 +23,12 @@ done
 if [ "$connected" -eq 0 ]; then
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${server}.1 \
-	       '/root/run_hostapd.sh'
+	       'source /etc/profile; /root/run_hostapd.sh'
 	sleep 3
 	for client in "${clients[@]}"; do
 		ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 			root@192.168.${client}.1 \
-			'/root/wpa_sup.sh'
+			'source /etc/profile; /root/wpa_sup.sh'
 	done
 	sleep 3
 else
@@ -38,5 +38,5 @@ fi
 for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
-	       '/root/collect_csi.sh dummy 9999999' > out${client}
+	       'source /etc/profile; /root/collect_csi.sh dummy 9999999' > out${client}
 done

@@ -63,7 +63,7 @@ while true ; do  # Loop until interval has elapsed.
 	   	 ip link set dev wlan0 up
            	 killall wpa_supplicant
             	 wpa_supplicant -D nl80211  -i wlan0 -c /etc/wpa_supplicant.conf -B
-           	 ifconfig wlan0 192.168.100.113
+           	 ifconfig wlan0 192.168.100.${DEV_ID}
 
 		 reconnect_start=$(date +%s)
                  while true; do
