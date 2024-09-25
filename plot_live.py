@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 import os
 import matplotlib
 import subprocess
+import math
+from matplotlib.animation import FuncAnimation
 
 def tail(f, n):
     proc = subprocess.Popen(['tail', '-n', str(n), f], stdout=subprocess.PIPE)
@@ -31,12 +33,8 @@ def tail(f, n):
 #matplotlib.use('Qt5Agg')
 ##%matplotlib qt
 
-# Update the next three lines with your server's information
-host = "192.168.7.1"
-username = "root"
-password = "admin"
-remote_file = "out13"
-local_file = "out13"
+clients = ["1", "3", "5", "7", "13"]
+local_files = ["out" + client for client in clients]
 window = 100
 #client = paramiko.client.SSHClient()
 #client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -49,13 +47,29 @@ df_phs = pd.DataFrame()
 df_times = pd.DataFrame()
 num_lines_read = 0
 #open(local_file, 'w').close()
-plt.figure()
-plt.title('Amplitude vs. Time', fontsize=16)
-plt.xlabel('Time (s)', fontsize=12)
-plt.ylabel('Amplitude', fontsize=12)
-while True:
+n = len(clients)
+cols = math.ceil(math.sqrt(n))
+rows = math.ceil(n / cols)
+
+fig, axs = plt.subplots(rows, cols, figsize=(12, 6))
+
+# Flatten the axs array if there are multiple rows/cols
+axs = axs.flatten()
+
+lines = [axs[i].plot(0,0, color='blue', linestyle='solid')[0] for i in range(n)]
+#for ax in axs:
+#    print("axset")
+#    ax.set_xlim(-1,101)
+#    ax.set_ylim(-5,121)
+#plt.figure()
+#for ax in axs:
+#    ax.title.set_text('Amplitude vs. Time', fontsize=16)
+#    #ax.xlabel('Time (s)', fontsize=12)
+#    #ax.ylabel('Amplitude', fontsize=12)
+def update(frame):
     # Open the local file in append mode
-    with open(local_file, "r") as f:
+    for file_idx, local_file in enumerate(local_files):
+      with open(local_file, "r") as f:
         # Read the remote file and write to the local file
         #stdin, stdout, stderr = client.exec_command(f"tail +{num_lines_read+1} {remote_file}")
         #lines = stdout.readlines()
@@ -67,9 +81,9 @@ while True:
 
         # Exit the loop if there are no more lines to read
         
-        lines = tail(local_file,window)
+        flines = tail(local_file,window)
         # Parse the CSI data from the current lines
-        mag, phase, time_csi, bad_idxs = Parse_csi(lines)
+        mag, phase, time_csi, bad_idxs = Parse_csi(flines)
         if bad_idxs:
             mag = mag[:window - len(bad_idxs)]
         # Create new dataframes to store the current iteration's data
@@ -88,19 +102,25 @@ while True:
 
 
         # Plot the data in real-time
-        plt.show(block=False)
-        plt.clf()
+        #plt.show(block=False)
         average_amps = df_amps.iloc[:, :].mean(axis=1)
-        plt.plot(average_amps, color='blue', linestyle='solid')  
+        ax = axs[file_idx]
+        ax.cla()
+        ax.set_title("Client " + clients[file_idx])
+        ax.set_ylabel("Mean amplitude")
+        ax.plot(average_amps, color='blue', linestyle='solid') 
+        ax.set_xlim(0,100)
+        ax.set_ylim(-1,101)
+        #lines[file_idx].set_xdata(range(len(average_amps)))
+        #lines[file_idx].set_ydata(average_amps)#, color='blue', linestyle='solid')
         for bad_idx in bad_idxs:
-            plt.axvline(bad_idx)
-        plt.draw()
-        plt.pause(0.01)
-        #if not lines:
-        #    break
+            ax.axvline(bad_idx, color='red')
 
-    time.sleep(0.1)
+    return lines
 
+ani = FuncAnimation(fig, update, interval=100, blit=False)
+#plt.tight_layout()
+plt.show()
 #client.close()
 exit()
 # Concatenate the dataframes

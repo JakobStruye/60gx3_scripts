@@ -1,4 +1,5 @@
 #!/bin/sh
+source /root/devid
 echo "" > $1
 
 # Reset the interface

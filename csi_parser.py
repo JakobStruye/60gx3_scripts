@@ -3,7 +3,6 @@ import numpy as np
 def Parse_csi(lines):
     
     num_lines = len(lines)
-    print(num_lines) 
     bad_idxs = []
     
     

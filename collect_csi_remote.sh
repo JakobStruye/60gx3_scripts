@@ -1,9 +1,21 @@
 #!/bin/bash
 
-server="9"
-clients=("13")
-devices=("${server[@]}" "${clients[@]}")
-echo ${epoch}
+source devices.sh
+
+cleanup() {
+    echo "CTRL+C caught! Cleaning up..."
+    
+    for client in "${clients[@]}"; do
+	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
+	       root@192.168.${client}.1 \
+	       "ps | grep 'collect_csi' | grep -v 'grep' | sed 's/^[ \t]*//' | cut -d' ' -f1 | xargs kill"
+    done
+    exit 1
+}
+
+# Trap SIGINT (CTRL+C) and call cleanup function
+trap cleanup SIGINT
+
 for device in "${devices[@]}"; do
         epoch=$(date +%s)
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
@@ -23,12 +35,12 @@ done
 if [ "$connected" -eq 0 ]; then
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${server}.1 \
-	       'source /etc/profile; /root/run_hostapd.sh'
+	       '/root/run_hostapd.sh'
 	sleep 3
 	for client in "${clients[@]}"; do
 		ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 			root@192.168.${client}.1 \
-			'source /etc/profile; /root/wpa_sup.sh'
+			'/root/wpa_sup.sh'
 	done
 	sleep 3
 else
@@ -38,5 +50,6 @@ fi
 for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
-	       'source /etc/profile; /root/collect_csi.sh dummy 9999999' > out${client}
+	       '/root/collect_csi.sh dummy 9999999' > out${client} &
 done
+wait
