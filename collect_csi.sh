@@ -48,6 +48,7 @@ while true ; do  # Loop until interval has elapsed.
 #18:FD:74:45:73:03 
 #18:FD:74:45:73:4E  
     # Get AoA
+    /root/millisleep 45
     echo -n -e '\x18\xFD\x74\x45\x73\x4E' | iw dev wlan0 vendor recv 0x001374 0x93 -
 
     # Save the measurement
