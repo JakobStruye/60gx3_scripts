@@ -50,6 +50,6 @@ fi
 for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
-	       '/root/collect_csi.sh dummy 9999999' > out${client} &
+	       '/root/collect_csi.sh dummy 9999999 0' > out${client} &
 done
 wait

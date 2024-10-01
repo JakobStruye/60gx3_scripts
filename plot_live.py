@@ -33,7 +33,7 @@ def tail(f, n):
 #matplotlib.use('Qt5Agg')
 ##%matplotlib qt
 
-clients = ["13", "13"]
+clients = ["1", "3", "5", "7", "13"]
 local_files = ["out" + client for client in clients]
 window = 100
 #client = paramiko.client.SSHClient()

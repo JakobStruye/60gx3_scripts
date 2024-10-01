@@ -1,3 +1,3 @@
 server="9"
-clients=("13")
+clients=("1" "3" "5" "7" "13")
 devices=("${server[@]}" "${clients[@]}")
