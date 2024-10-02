@@ -103,7 +103,8 @@ def update(frame):
 
         # Plot the data in real-time
         #plt.show(block=False)
-        average_amps = df_amps.iloc[:, :].mean(axis=1)
+        average_amps = df_amps.iloc[:, :30].mean(axis=1)
+        #average_amps = df_amps.iloc[:,0]
         ax = axs[file_idx]
         ax.cla()
         ax.set_title("Client " + clients[file_idx])

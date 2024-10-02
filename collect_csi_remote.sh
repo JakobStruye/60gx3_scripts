@@ -1,10 +1,11 @@
 #!/bin/bash
-
+fname=${1:-$(date +'%Y%m%d-%H%M%S')}
 source devices.sh
 
 cleanup() {
     echo "CTRL+C caught! Cleaning up..."
     
+    killall restore_ap.sh
     for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
@@ -20,8 +21,9 @@ for device in "${devices[@]}"; do
         epoch=$(date +%s)
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 		root@192.168.${device}.1 \
-		"date -s '@$(date +%s)'"
+		"chronyd -q 'server 192.168.0.1 iburst'"&
 done
+sleep 6
 for client in "${clients[@]}"; do
 	echo $client
 	connected=$(ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
@@ -48,8 +50,15 @@ else
 fi
 
 for client in "${clients[@]}"; do
+        rm out${client} &> /dev/null
+        touch ${fname}_out${client}
+        ln -s ${fname}_out${client} out${client}
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
-	       '/root/collect_csi.sh dummy 9999999 0' > out${client} &
+	       '/root/collect_csi.sh 9999999 0' > ${fname}_out${client} &
 done
+if [ "${#clients[@]}" -gt 1 ]; then
+    ./restore_ap.sh&
+fi
+
 wait

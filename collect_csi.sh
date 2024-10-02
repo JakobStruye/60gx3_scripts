@@ -1,6 +1,5 @@
 #!/bin/sh
 source /root/devid
-echo "" > $1
 
 # Reset the interface
 #ip link set dev wlan0 down
@@ -48,16 +47,14 @@ while true ; do  # Loop until interval has elapsed.
 #18:FD:74:45:73:03 
 #18:FD:74:45:73:4E  
     # Get AoA
-    /root/millisleep $3
+    /root/millisleep $2
     echo -n -e '\x18\xFD\x74\x45\x73\x4E' | iw dev wlan0 vendor recv 0x001374 0x93 -
 
     # Save the measurement
-    touch $1
-    chmod 777 $1
     val=$(dmesg | tail -n1)
-    echo $val >> $1
+    val="["$(/root/millitime)"] "$(echo $val |cut -d' ' -f3-)
     echo $val
-    retval=$(echo $val | cut -d' ' -f 5 | cut -d',' -f1)
+    retval=$(echo $val | cut -d' ' -f 4 | cut -d',' -f1)
     if [[ "$retval" != 0 ]]; then
 	    while true; do
 	    	#reconnect
@@ -86,7 +83,7 @@ while true ; do  # Loop until interval has elapsed.
                 fi	 
 		 nowtime=$(date +%s)
 		 elapsed_time=$(( nowtime - starttime ))
-		    if [ "$elapsed_time" -ge $2 ]; then
+		    if [ "$elapsed_time" -ge $1 ]; then
 			    exit
 		    fi
 	     done
@@ -102,9 +99,9 @@ while true ; do  # Loop until interval has elapsed.
     nowtime=$(date +%s)
     elapsed_time=$(( nowtime - starttime ))
     # Break after a certain number of measurements
-    #if [[ $i -eq $2 ]]; then
-    if [ "$elapsed_time" -ge $2 ]; then
-      #echo "[CSI] We got $2 measurements"
+    #if [[ $i -eq $1 ]]; then
+    if [ "$elapsed_time" -ge $1 ]; then
+      #echo "[CSI] We got $1 measurements"
       break
     fi
 done
