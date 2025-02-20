@@ -33,7 +33,7 @@ def tail(f, n):
 #matplotlib.use('Qt5Agg')
 ##%matplotlib qt
 
-clients = ["1", "3", "5", "7", "13"]
+clients = ["3", "7"]
 local_files = ["out" + client for client in clients]
 window = 100
 #client = paramiko.client.SSHClient()
@@ -82,6 +82,7 @@ def update(frame):
         # Exit the loop if there are no more lines to read
         
         flines = tail(local_file,window)
+
         # Parse the CSI data from the current lines
         mag, phase, time_csi, bad_idxs = Parse_csi(flines)
         if bad_idxs:
@@ -119,7 +120,7 @@ def update(frame):
 
     return lines
 
-ani = FuncAnimation(fig, update, interval=100, blit=False)
+ani = FuncAnimation(fig, update, interval=1000, blit=False)
 #plt.tight_layout()
 plt.show()
 #client.close()

@@ -1,4 +1,5 @@
 #!/bin/bash
+exit
 source devices.sh
 sleep 1
 while true; do

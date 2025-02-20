@@ -48,14 +48,16 @@ while true ; do  # Loop until interval has elapsed.
 #18:FD:74:45:73:4E  
     # Get AoA
     /root/millisleep $2
-    echo -n -e '\x18\xFD\x74\x45\x73\x4E' | iw dev wlan0 vendor recv 0x001374 0x93 -
+    echo -n -e '\xdc\x2c\x6e\xf3\x69\x91' | iw dev wlan0 vendor recv 0x001374 0x93 -
 
     # Save the measurement
     val=$(dmesg | tail -n1)
-    val="["$(/root/millitime)"] "$(echo $val |cut -d' ' -f3-)
+    val="["$(/root/millitime)"] "$(echo $val |cut -d']' -f2-)
     echo $val
     retval=$(echo $val | cut -d' ' -f 4 | cut -d',' -f1)
-    if [[ "$retval" != 0 ]]; then
+    retval=$(echo $val | tr -cd ',' | wc -c)
+
+    if [[ "$retval" != 71 ]]; then
 	    while true; do
 	    	#reconnect
            	 ip link set dev wlan0 down

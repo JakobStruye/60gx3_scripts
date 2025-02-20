@@ -5,7 +5,7 @@ source devices.sh
 cleanup() {
     echo "CTRL+C caught! Cleaning up..."
     
-    killall restore_ap.sh
+    killall restore_ap.sh restore_ap_ptp.sh
     for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
@@ -35,9 +35,11 @@ for client in "${clients[@]}"; do
 done
 
 if [ "$connected" -eq 0 ]; then
-	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
+	for server in "${servers[@]}"; do
+	    ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${server}.1 \
 	       '/root/run_hostapd.sh'
+        done
 	sleep 3
 	for client in "${clients[@]}"; do
 		ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
@@ -57,8 +59,11 @@ for client in "${clients[@]}"; do
 	       root@192.168.${client}.1 \
 	       '/root/collect_csi.sh 9999999 0' > ${fname}_out${client} &
 done
-if [ "${#clients[@]}" -gt 1 ]; then
-    ./restore_ap.sh&
-fi
-
+#if [ "${#clients[@]}" -gt 1 ]; then
+#    ./restore_ap.sh&
+#fi
+for ((i=0; i<${#clients[@]}; i++)) do
+    echo "restore script ${servers[i]} ${clients[i]}"
+    ./restore_ap_ptp.sh ${servers[i]} ${clients[i]}&
+done
 wait
