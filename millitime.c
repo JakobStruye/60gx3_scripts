@@ -27,16 +27,20 @@ int main (void) {
         return 1;
     }
 
+    //printf (
+    //    "%d/%d/%d %d:%02d:%02d:%03d\n",
+    //    parsed->tm_mday,
+    //    parsed->tm_mon + 1,
+    //    parsed->tm_year + 1900,
+    //    parsed->tm_hour,
+    //    parsed->tm_min,
+    //    parsed->tm_sec,
+    //    now.tv_usec / 1000
+    //);
     printf (
-        "%d/%d/%d %d:%02d:%02d:%03d\n",
-        parsed->tm_mday,
-        parsed->tm_mon + 1,
-        parsed->tm_year + 1900,
-        parsed->tm_hour,
-        parsed->tm_min,
-        parsed->tm_sec,
-        now.tv_usec / 1000
-    );
+        "%.6f\n", 
+        now.tv_sec + now.tv_usec / 1000000.0
+    );  
 
     return 0;
 }  
