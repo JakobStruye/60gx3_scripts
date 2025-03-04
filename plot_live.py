@@ -25,6 +25,7 @@ import matplotlib
 import subprocess
 import math
 from matplotlib.animation import FuncAnimation
+import matplotlib.image as mpimg
 
 def tail(f, n):
     proc = subprocess.Popen(['tail', '-n', str(n), f], stdout=subprocess.PIPE)
@@ -33,7 +34,7 @@ def tail(f, n):
 #matplotlib.use('Qt5Agg')
 ##%matplotlib qt
 
-clients = ["3", "7"]
+clients = ["13", "17"]
 local_files = ["out" + client for client in clients]
 window = 100
 #client = paramiko.client.SSHClient()
@@ -51,10 +52,22 @@ n = len(clients)
 cols = math.ceil(math.sqrt(n))
 rows = math.ceil(n / cols)
 
-fig, axs = plt.subplots(rows, cols, figsize=(12, 6))
+fig, axs = plt.subplots(2, cols, figsize=(12, 6))
+
 
 # Flatten the axs array if there are multiple rows/cols
 axs = axs.flatten()
+
+#IMAGE
+ims = []
+#fig.subplots_adjust(hspace=0.5)  # Space between subplots
+image = mpimg.imread('img.png')
+ims.append(axs[2].imshow(image, extent=[0,512,0,871], alpha=0.0))
+axs[2].axis('off')  # Hide axes
+
+# Add second image below the second subplot
+ims.append(axs[3].imshow(image, extent=[0,512,0,871], alpha=0.0))
+axs[3].axis('off')  # Hide axes
 
 lines = [axs[i].plot(0,0, color='blue', linestyle='solid')[0] for i in range(n)]
 #for ax in axs:
@@ -118,9 +131,15 @@ def update(frame):
         for bad_idx in bad_idxs:
             ax.axvline(bad_idx, color='red')
 
+        df_amps = df_amps.iloc[-20:,:30]
+        diff = df_amps.mean(axis=1).diff().abs().dropna().sum()
+        print(diff)
+        alpha = (diff-125)/300
+        alpha = np.clip(alpha,0,1)
+        ims[file_idx].set_alpha(alpha)
     return lines
 
-ani = FuncAnimation(fig, update, interval=1000, blit=False)
+ani = FuncAnimation(fig, update, interval=200, blit=False)
 #plt.tight_layout()
 plt.show()
 #client.close()

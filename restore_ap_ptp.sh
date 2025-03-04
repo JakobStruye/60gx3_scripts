@@ -20,11 +20,13 @@ while true; do
     else
         bad=1
     fi
-    echo "restoring $server"
-    ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
+    if [ "$bad" -eq 1 ]; then
+      echo "restoring $server"
+      ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
                root@192.168.${server}.1 \
              "/root/run_hostapd.sh"
              sleep 120
+    fi
   fi
   sleep 1
 done
