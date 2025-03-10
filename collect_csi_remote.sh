@@ -21,7 +21,7 @@ for device in "${devices[@]}"; do
         epoch=$(date +%s)
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 		root@192.168.${device}.1 \
-		"chronyd -q 'server 192.168.0.1 iburst'"&
+		"killall chrony && chronyd -q 'server 192.168.0.1 iburst'"&
 done
 sleep 6
 for client in "${clients[@]}"; do
