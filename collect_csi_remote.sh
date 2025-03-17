@@ -1,11 +1,20 @@
 #!/bin/bash
 fname=${1:-$(date +'%Y%m%d-%H%M%S')}
+python osc_sync.py > osc_${fname} &
+TIME_PID1=$!
+sleep 1
+./osc_timestamp.sh osc_${fname}&
+TIME_PID2=$!
 source devices.sh
+rm osc.log || yes
+ln -s osc_${fname}.log osc.log
 
 cleanup() {
     echo "CTRL+C caught! Cleaning up..."
     
     killall restore_ap.sh restore_ap_ptp.sh
+    kill $TIME_PID1
+    kill $TIME_PID2
     for client in "${clients[@]}"; do
 	ssh -oHostKeyAlgorithms=ssh-rsa -oPubkeyAcceptedAlgorithms=+ssh-rsa \
 	       root@192.168.${client}.1 \
